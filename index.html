@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Entregas Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-hover: #334155;
+            --accent: #ff5252;
+            --accent-glow: rgba(255, 82, 82, 0.35);
+            --emerald: #10b981;
+            --amber: #f59e0b;
+            --blue: #3b82f6;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --glass-bg: rgba(30, 41, 59, 0.85);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 12px;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 82, 82, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 40%);
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 520px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding-bottom: 24px;
+        }
+
+        .app-header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .brand-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--accent), #ff7b00);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .brand-title h1 {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-title p {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .quick-add-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        .quick-add-btn:active {
+            transform: scale(0.95);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .metric-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+        }
+
+        .metric-card.total::before { background: var(--blue); }
+        .metric-card.earnings::before { background: var(--emerald); }
+        .metric-card.pending::before { background: var(--amber); }
+
+        .metric-label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .metric-value {
+            font-size: 16px;
+            font-weight: 800;
+            color: white;
+        }
+
+        .controls-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .search-box {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .search-box input {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            padding: 10px 14px 10px 38px;
+            border-radius: 10px;
+            color: white;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: var(--accent);
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+        }
+
+        .filter-chip {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .filter-chip.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .deliveries-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 4px;
+        }
+
+        .deliveries-header h2 {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .delivery-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .delivery-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .code-badge {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #38bdf8;
+        }
+
+        .status-badge {
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .status-pendente { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .status-em_rota { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .status-entregue { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .status-cancelado { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        .client-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: white;
+            margin-top: 4px;
+        }
+
+        .card-details {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .detail-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-row i {
+            width: 14px;
+            text-align: center;
+            color: var(--accent);
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 8px;
+            border-top: 1px dashed var(--border);
+        }
+
+        .price-tag {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--emerald);
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            width: 100%;
+            max-width: 520px;
+            border-radius: 24px 24px 0 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: var(--text-secondary);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .form-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 12px;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .input-wrapper input, .input-wrapper select, .input-wrapper textarea {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border);
+            padding: 10px 12px 10px 36px;
+            border-radius: 10px;
+            color: white;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .input-wrapper textarea {
+            padding-left: 12px;
+            resize: none;
+            height: 60px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, var(--accent), #ff7b00);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 8px;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .empty-state i {
+            font-size: 40px;
+            opacity: 0.5;
+        }
+
+        @media (min-width: 520px) {
+            .modal-overlay { align-items: center; }
+            .modal-card { border-radius: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="brand-info">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-motorcycle"></i>
+                </div>
+                <div class="brand-title">
+                    <h1>Delivery Express</h1>
+                    <p>Controle de Entregas</p>
+                </div>
+            </div>
+            <button class="quick-add-btn" id="openModalBtn">
+                <i class="fa-solid fa-plus"></i> Nova
+            </button>
+        </header>
+
+        <!-- Dashboard Stats -->
+        <div class="dashboard-grid">
+            <div class="metric-card total">
+                <span class="metric-label">Total</span>
+                <span class="metric-value" id="statTotal">0</span>
+            </div>
+            <div class="metric-card earnings">
+                <span class="metric-label">Ganhos</span>
+                <span class="metric-value" id="statEarnings">R$ 0,00</span>
+            </div>
+            <div class="metric-card pending">
+                <span class="metric-label">Pendentes</span>
+                <span class="metric-value" id="statPending">0</span>
+            </div>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="controls-card">
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="searchInput" placeholder="Buscar cliente, código ou endereço...">
+            </div>
+            <div class="filter-tabs">
+                <button class="filter-chip active" data-filter="todos">Todos</button>
+                <button class="filter-chip" data-filter="pendente">Pendentes</button>
+                <button class="filter-chip" data-filter="em_rota">Em Rota</button>
+                <button class="filter-chip" data-filter="entregue">Entregues</button>
+            </div>
+        </div>
+
+        <!-- Deliveries List -->
+        <div class="deliveries-header">
+            <h2>Minhas Entregas</h2>
+            <span style="font-size: 12px; color: var(--text-secondary);" id="deliveryCount">0 registros</span>
+        </div>
+
+        <div class="delivery-list" id="deliveryList"></div>
+    </div>
+
+    <!-- Modal Form -->
+    <div class="modal-overlay" id="deliveryModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modalTitle">Nova Entrega</h3>
+                <button class="close-btn" id="closeModalBtn">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="deliveryForm" class="form-grid">
+                <input type="hidden" id="deliveryId">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Código da Entrega</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-hashtag"></i>
+                            <input type="text" id="deliveryCode" required placeholder="Ex: #DEL-1092">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Valor (R$)</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-brazilian-real-sign"></i>
+                            <input type="number" step="0.01" id="deliveryPrice" required placeholder="0.00">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Nome do Cliente</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="clientName" required placeholder="Nome do cliente">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Endereço de Entrega</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <input type="text" id="clientAddress" required placeholder="Rua, número, bairro...">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Forma de Pagamento</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-credit-card"></i>
+                            <select id="paymentMethod">
+                                <option value="Pix">Pix</option>
+                                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                                <option value="Cartão de Débito">Cartão de Débito</option>
+                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="Pago na Plataforma">Pago na Plataforma</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-clock"></i>
+                            <select id="deliveryStatus">
+                                <option value="pendente">Pendente</option>
+                                <option value="em_rota">Em Rota</option>
+                                <option value="entregue">Entregue</option>
+                                <option value="cancelado">Cancelado</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Observações (Opcional)</label>
+                    <div class="input-wrapper">
+                        <textarea id="deliveryNotes" placeholder="Ex: Deixar na portaria, troco para 50..."></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">Salvar Entrega</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let deliveries = JSON.parse(localStorage.getItem('express_deliveries')) || [];
+        let currentFilter = 'todos';
+
+        if (deliveries.length === 0) {
+            deliveries = [
+                {
+                    id: '1',
+                    code: '#DEL-8841',
+                    client: 'Carlos Eduardo',
+                    address: 'Av. Paulista, 1000 - Apto 42',
+                    price: 18.50,
+                    payment: 'Pix',
+                    status: 'em_rota',
+                    notes: 'Tocar a campainha duas vezes'
+                }
+            ];
+  
